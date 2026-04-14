@@ -1,0 +1,390 @@
+
+<style>
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  *{box-sizing:border-box}
+  .sim{font-size:14px;color:var(--color-text-primary);max-width:680px}
+  .phase-badge{display:inline-block;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+  .card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:20px;margin-bottom:14px}
+  .card-accent{border-left:3px solid;border-radius:0 var(--border-radius-lg) var(--border-radius-lg) 0}
+  .scenario-box{background:var(--color-background-secondary);border:1.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:18px 20px;margin-bottom:16px}
+  .scenario-type{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+  .scenario-text{font-size:15px;font-weight:500;line-height:1.5;color:var(--color-text-primary)}
+  .scenario-detail{font-size:13px;color:var(--color-text-secondary);margin-top:6px;line-height:1.5}
+  .lar-step{border-radius:var(--border-radius-lg);padding:16px;margin-bottom:10px;border:0.5px solid var(--color-border-tertiary)}
+  .lar-label{font-size:13px;font-weight:500;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .lar-letter{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+  .q-row{margin-bottom:8px}
+  .q-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+  textarea{width:100%;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 10px;font-size:13px;font-family:var(--font-sans);color:var(--color-text-primary);background:var(--color-background-primary);resize:vertical;min-height:56px;line-height:1.5}
+  textarea:focus{outline:none;border-color:var(--color-border-primary)}
+  button{padding:9px 20px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary)}
+  button:hover{background:var(--color-background-secondary)}
+  button.primary{background:var(--color-background-primary);border:1.5px solid var(--color-border-primary);font-weight:500}
+  button.danger-btn{border-color:#D85A30;color:#993C1D}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .progress-bar{height:4px;background:var(--color-background-secondary);border-radius:2px;margin-bottom:20px;overflow:hidden}
+  .progress-fill{height:100%;border-radius:2px;transition:width .4s ease;background:#534AB7}
+  .scenario-nav{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .s-pill{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all .15s}
+  .s-pill.active{background:var(--color-background-primary);border-color:var(--color-border-primary);color:var(--color-text-primary);font-weight:500}
+  .s-pill.done{opacity:.5}
+  .reflection-q{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;margin-bottom:8px}
+  .reflection-q p{font-size:13px;color:var(--color-text-secondary);margin:0 0 6px}
+  .contrast-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .contrast-cell{padding:12px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary)}
+  .contrast-cell .cl{font-size:11px;font-weight:500;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
+  .contrast-cell textarea{min-height:44px}
+  .insight-box{border:0.5px solid var(--color-border-success);border-radius:var(--border-radius-lg);padding:14px 16px;background:var(--color-background-success)}
+  .phase-header{font-size:12px;color:var(--color-text-tertiary);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+  .phase-title{font-size:17px;font-weight:500;margin:0 0 4px;color:var(--color-text-primary)}
+  .phase-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:14px}
+  .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;border:0.5px solid}
+  .complete-screen{text-align:center;padding:24px 0}
+  .big-check{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;background:var(--color-background-success);border:1.5px solid var(--color-border-success)}
+</style>
+
+<div class="sim">
+  <h2 class="sr-only">Simulacion interactiva del Protocolo LAR — Liderar Atencion en Riesgo</h2>
+  <div id="root"></div>
+</div>
+
+<script>
+const SCENARIOS = [
+  {
+    id:0, type:"Profesional", color:"#534AB7",
+    title:"Error critico antes de entregar",
+    text:"Faltan 25 minutos para enviar un informe que tu cliente esperaba hace dos dias. Al revisarlo por ultima vez, encontras un error importante en los datos centrales. El numero que usaste como referencia esta mal. Todo el analisis podria estar equivocado.",
+    detail:"El cliente es exigente. Ya hubo una tension previa. Tu jefe sabe que deberias haberlo revisado antes.",
+    r1:"Que me quedo paralizado y no se por donde empezar.",
+    r2:"Que lo mando igual esperando que no lo noten.",
+    r3:"Que entro en panico y aviso sin tener claridad de que tan grave es."
+  },
+  {
+    id:1, type:"Emocional", color:"#D85A30",
+    title:"Critica publica inesperada",
+    text:"Estas presentando un proyecto en una reunion importante. Alguien del equipo te interrumpe y dice frente a todos que 'este enfoque ya fue descartado el ano pasado' y que 'parece que no estabas al tanto'. Hay silencio en la sala.",
+    detail:"La persona que habla tiene mas antiguedad que vos. Varias personas en la sala te miran.",
+    r1:"Que me quedo en blanco y no puedo responder.",
+    r2:"Que contra-ataco y empeoro la situacion.",
+    r3:"Que me bloqueo y el resto de la presentacion se cae."
+  },
+  {
+    id:2, type:"Critica", color:"#D85A30",
+    title:"Accidente menor manejando",
+    text:"Vas manejando con prisa porque llegaste tarde. Al doblar una esquina, no ves a un ciclista que salia de un garage y lo rozas levemente. El ciclista frenó a tiempo, no cayó, pero está alterado y ya hay personas alrededor mirando.",
+    detail:"Tu primer instinto es salir del auto. Tu segundo pensamiento es que llegás tarde. Tu tercero es que no sabes si el ciclista esta bien.",
+    r1:"Que arranco el auto y me voy sin bajarme.",
+    r2:"Que me bajo y empiezo a discutir.",
+    r3:"Que me paralizo sin saber que hacer primero."
+  },
+  {
+    id:3, type:"Profesional", color:"#1D9E75",
+    title:"Cliente furioso en tiempo real",
+    text:"Recibes una llamada inesperada de un cliente importante. Su tono es agresivo desde el primer segundo. Dice que el trabajo que entregaste 'es inaceptable', que 'nunca deberia haberles contratado' y que quiere una solucion 'ahora mismo'. Llevás cinco meses trabajando en ese proyecto.",
+    detail:"Mientras habla, tu mente empieza a recordar todos los acuerdos, los cambios que el cliente mismo pidio, las veces que aprobó algo que ahora rechaza.",
+    r1:"Que me defiendo y empeoró la relación.",
+    r2:"Que me quedo en silencio y el cliente interpreta que le estoy dando la razón.",
+    r3:"Que prometo cosas que no puedo cumplir solo para que pare de hablar."
+  },
+  {
+    id:4, type:"Emocional", color:"#BA7517",
+    title:"Conversacion dificil que no podés evitar",
+    text:"Tenes que hablar con alguien cercano sobre algo que lleva semanas acumulandose. Lo venias postergando. Hoy esa persona te dijo 'necesito que hablemos'. Ya no podés evitarlo. El tema involucra algo que hiciste, algo que dijiste, o algo que no hiciste.",
+    detail:"Sentes una mezcla de culpa, miedo a lo que puede pasar, y una parte de vos que quiere terminar con esto de una vez.",
+    r1:"Que me pongo a la defensiva desde el primer segundo.",
+    r2:"Que me disculpo por todo solo para que pase rapido.",
+    r3:"Que me desconecto emocionalmente y la conversacion no llega a ningún lado."
+  },
+  {
+    id:5, type:"Critica", color:"#2D6A8F",
+    title:"Decision urgente con informacion incompleta",
+    text:"Estas a cargo de una situacion que requiere una decision en los proximos minutos. No tenes toda la informacion que quisieras. Las personas que te rodean te estan mirando esperando que definas el camino. Si esperás más, la situacion puede empeorar. Si actuas con informacion incompleta, podes cometer un error.",
+    detail:"Sentes la presion de todos mirándote. Tu mente dice 'necesito mas datos'. El tiempo dice 'no hay tiempo'.",
+    r1:"Que me paralizo esperando certeza que no va a llegar.",
+    r2:"Que tomo una decision apresurada para parecer que tengo control.",
+    r3:"Que delego la decision en alguien mas para no equivocarme yo."
+  }
+];
+
+const STATE = {
+  phase: 'intro',
+  scenarioIdx: 0,
+  scDone: new Set(),
+  answers: {},
+};
+
+function save(key, val){ STATE.answers[STATE.scenarioIdx+'.'+key] = val; }
+function get(key){ return STATE.answers[STATE.scenarioIdx+'.'+key]||''; }
+
+function render(){ document.getElementById('root').innerHTML = buildHTML(); bindEvents(); }
+
+function buildHTML(){
+  if(STATE.phase==='intro') return introHTML();
+  if(STATE.phase==='scenario') return scenarioHTML();
+  if(STATE.phase==='react') return reactHTML();
+  if(STATE.phase==='lar') return larHTML();
+  if(STATE.phase==='reflect') return reflectHTML();
+  if(STATE.phase==='complete') return completeHTML();
+  return '';
+}
+
+function introHTML(){
+  return `
+  <div class="card" style="border-top:3px solid #534AB7">
+    <div class="phase-header">Protocolo L.A.R.</div>
+    <div class="phase-title">Simulacion S.E.R. — Sistema en Riesgo</div>
+    <div class="phase-sub">Entrenamiento de liderazgo atencional bajo presion · Modulo 6 · Concentrarte</div>
+    <p style="font-size:14px;line-height:1.7;color:var(--color-text-secondary);margin:0 0 14px">
+      Esta simulacion te pone en situaciones criticas reales. En cada una vas a experimentar primero tu reaccion automatica, y luego vas a aplicar el Protocolo <strong style="color:var(--color-text-primary)">L.A.R.</strong> para recuperar direccion consciente.
+    </p>
+    <p style="font-size:14px;line-height:1.7;color:var(--color-text-secondary);margin:0 0 16px">
+      No hay respuestas correctas o incorrectas. Lo que importa es el contraste que vas a descubrir entre como reaccionas y como podes dirigir tu atencion.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px">
+      ${['L — Localizar','A — Aclarar','R — Responder'].map((l,i)=>`
+      <div style="text-align:center;padding:12px 8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary)">
+        <div style="width:32px;height:32px;border-radius:50%;background:${'#534AB7,#D85A30,#1D9E75'.split(',')[i]};color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px">${'LAR'[i]}</div>
+        <div style="font-size:12px;font-weight:500">${l}</div>
+      </div>`).join('')}
+    </div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:16px">
+      <strong style="color:var(--color-text-primary)">6 escenarios disponibles</strong> — profesionales, emocionales y criticos. Podes hacerlos en cualquier orden.
+    </div>
+    <div class="btn-row"><button class="primary" onclick="goScenario()">Comenzar simulacion →</button></div>
+  </div>`;
+}
+
+function scenarioHTML(){
+  const sc = SCENARIOS[STATE.scenarioIdx];
+  const pills = SCENARIOS.map((s,i)=>`<span class="s-pill${i===STATE.scenarioIdx?' active':''}${STATE.scDone.has(i)?' done':''}" onclick="selectSc(${i})">${s.type}</span>`).join('');
+  return `
+  <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(STATE.scDone.size/6*100)}%"></div></div>
+  <div class="phase-header">Elige un escenario</div>
+  <div class="scenario-nav">${pills}</div>
+  <div class="scenario-box">
+    <div class="scenario-type" style="color:${sc.color}">${sc.type}</div>
+    <div class="scenario-text">${sc.title}</div>
+    <p class="scenario-detail">${sc.text}</p>
+    <p style="font-size:12px;color:var(--color-text-tertiary);margin:8px 0 0;font-style:italic">${sc.detail}</p>
+  </div>
+  <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px">Leé la situacion. Sentí la presion. Luego continúa.</p>
+  <div class="btn-row"><button class="primary" onclick="goPhase('react')">Esta situacion me genera presion — Continuar →</button></div>`;
+}
+
+function reactHTML(){
+  const sc = SCENARIOS[STATE.scenarioIdx];
+  return `
+  <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(STATE.scDone.size/6*100+12)}%"></div></div>
+  <div class="phase-header">Momento 1 — Reaccion espontanea</div>
+  <div class="phase-title">¿Como responderias sin ningun protocolo?</div>
+  <div class="phase-sub" style="margin-bottom:12px">Antes de aprender algo nuevo, hay que ver como respondemos en automatico.</div>
+
+  <div class="scenario-box" style="margin-bottom:14px">
+    <div class="scenario-type" style="color:${sc.color}">${sc.type} · ${sc.title}</div>
+    <p class="scenario-detail" style="margin:0">${sc.text}</p>
+  </div>
+
+  <div class="card">
+    <div class="q-row">
+      <div class="q-label">¿Que harias primero? (sin pensar demasiado, lo mas honesto posible)</div>
+      <textarea id="r-first" placeholder="Escribe tu primera reaccion espontanea...">${get('r-first')}</textarea>
+    </div>
+    <div class="q-row" style="margin-top:10px">
+      <div class="q-label">¿Que estarias pensando/sintiendo en ese momento?</div>
+      <textarea id="r-feel" placeholder="Emociones, pensamientos automaticos...">${get('r-feel')}</textarea>
+    </div>
+    <p style="font-size:12px;color:var(--color-text-tertiary);margin:10px 0 0;font-style:italic">
+      Algunas reacciones comunes en esta situacion: <em>${sc.r1} / ${sc.r2}</em>
+    </p>
+  </div>
+
+  <div class="btn-row">
+    <button onclick="goPhase('scenario')">← Volver</button>
+    <button class="primary" onclick="saveAndGo('r-first','r-feel','lar')">Ahora aplico el Protocolo L.A.R. →</button>
+  </div>`;
+}
+
+function larHTML(){
+  const sc = SCENARIOS[STATE.scenarioIdx];
+  return `
+  <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(STATE.scDone.size/6*100+35)}%"></div></div>
+  <div class="phase-header">Momento 2 — Protocolo L.A.R.</div>
+  <div class="phase-title">Localizar · Aclarar · Responder</div>
+  <div class="phase-sub">Respondi cada pregunta como si estuvieras en la situacion ahora mismo.</div>
+
+  <div style="margin-bottom:10px;font-size:12px;color:var(--color-text-tertiary);font-style:italic">Situacion: ${sc.title}</div>
+
+  <div class="lar-step" style="background:var(--color-background-secondary)">
+    <div class="lar-label">
+      <div class="lar-letter" style="background:#534AB7;color:#fff">L</div>
+      <div><strong>Localizar</strong> — ¿Donde estoy parado realmente?</div>
+    </div>
+    <div class="q-row">
+      <div class="q-label">¿Que esta ocurriendo exactamente? (solo hechos, sin interpretacion)</div>
+      <textarea id="l-hechos" placeholder="Hecho 1: ... / Hecho 2: ...">${get('l-hechos')}</textarea>
+    </div>
+    <div class="q-row" style="margin-top:8px">
+      <div class="q-label">¿Que esta en riesgo ahora?</div>
+      <textarea id="l-riesgo" placeholder="¿La relacion? ¿El resultado? ¿Mi reputacion? ¿La seguridad?">${get('l-riesgo')}</textarea>
+    </div>
+    <div class="q-row" style="margin-top:8px">
+      <div class="q-label">¿Como estoy yo en este momento?</div>
+      <textarea id="l-estado" placeholder="Siento... / Noto en mi cuerpo... / Mi mente esta...">${get('l-estado')}</textarea>
+    </div>
+  </div>
+
+  <div class="lar-step" style="background:var(--color-background-secondary)">
+    <div class="lar-label">
+      <div class="lar-letter" style="background:#D85A30;color:#fff">A</div>
+      <div><strong>Aclarar</strong> — ¿Que es real y que estoy inventando?</div>
+    </div>
+    <div class="q-row">
+      <div class="q-label">¿Que estoy interpretando? (juicio vs hecho)</div>
+      <textarea id="a-juicio" placeholder="Estoy pensando que... pero lo que realmente paso es...">${get('a-juicio')}</textarea>
+    </div>
+    <div class="q-row" style="margin-top:8px">
+      <div class="q-label">¿Que emocion esta liderando ahora?</div>
+      <textarea id="a-emocion" placeholder="Miedo / enojo / culpa / ansiedad / confusion...">${get('a-emocion')}</textarea>
+    </div>
+    <div class="q-row" style="margin-top:8px">
+      <div class="q-label">¿Que es lo mas importante resolver primero?</div>
+      <textarea id="a-prioridad" placeholder="Lo mas urgente real es...">${get('a-prioridad')}</textarea>
+    </div>
+  </div>
+
+  <div class="lar-step" style="background:var(--color-background-secondary)">
+    <div class="lar-label">
+      <div class="lar-letter" style="background:#1D9E75;color:#fff">R</div>
+      <div><strong>Responder</strong> — ¿Que accion elijo?</div>
+    </div>
+    <div class="q-row">
+      <div class="q-label">¿Que voy a hacer en los proximos 5 minutos?</div>
+      <textarea id="r-ahora" placeholder="Accion inmediata concreta...">${get('r-ahora')}</textarea>
+    </div>
+    <div class="q-row" style="margin-top:8px">
+      <div class="q-label">¿Que puede esperar para despues?</div>
+      <textarea id="r-despues" placeholder="Esto lo resuelvo mas tarde...">${get('r-despues')}</textarea>
+    </div>
+    <div class="q-row" style="margin-top:8px">
+      <div class="q-label">¿Como quiero desempeniharme en esta situacion?</div>
+      <textarea id="r-como" placeholder="Quiero actuar con... / Quiero ser...">${get('r-como')}</textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button onclick="goPhase('react')">← Volver</button>
+    <button class="primary" onclick="saveLarAndGo()">Ver el contraste →</button>
+  </div>`;
+}
+
+function reflectHTML(){
+  const sc = SCENARIOS[STATE.scenarioIdx];
+  const rf = get('r-first')||'(no completado)';
+  const rn = get('r-ahora')||'(no completado)';
+  const rc = get('r-como')||'';
+  return `
+  <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(STATE.scDone.size/6*100+70)}%"></div></div>
+  <div class="phase-header">Momento 3 — El contraste</div>
+  <div class="phase-title">Reaccion vs Direccion</div>
+  <div class="phase-sub">Este es el aprendizaje central de todo el modulo.</div>
+
+  <div class="contrast-grid">
+    <div class="contrast-cell" style="border-color:#D85A30">
+      <div class="cl" style="color:#D85A30">Sin protocolo</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.5">${rf}</div>
+    </div>
+    <div class="contrast-cell" style="border-color:#1D9E75">
+      <div class="cl" style="color:#1D9E75">Con Protocolo L.A.R.</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.5">${rn}${rc?' — <em>'+rc+'</em>':''}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:13px;font-weight:500;margin-bottom:10px">Reflexion personal</div>
+    <div class="reflection-q">
+      <p>¿Que cambio mas entre tu reaccion espontanea y tu respuesta dirigida?</p>
+      <textarea id="ref1" placeholder="Lo que mas cambio fue...">${get('ref1')}</textarea>
+    </div>
+    <div class="reflection-q">
+      <p>¿Donde perdiste claridad durante el proceso?</p>
+      <textarea id="ref2" placeholder="El momento mas dificil fue...">${get('ref2')}</textarea>
+    </div>
+    <div class="reflection-q">
+      <p>¿Que descubriste sobre tu patron automatico de reaccion en situaciones de presion?</p>
+      <textarea id="ref3" placeholder="Mi patron automatico es...">${get('ref3')}</textarea>
+    </div>
+    <div class="reflection-q">
+      <p>¿Que parte del protocolo fue mas util para vos en esta situacion?</p>
+      <textarea id="ref4" placeholder="Lo que mas me ayudo fue...">${get('ref4')}</textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button onclick="goPhase('lar')">← Volver al LAR</button>
+    <button class="primary" onclick="completeScenario()">Completar este escenario →</button>
+  </div>`;
+}
+
+function completeHTML(){
+  const done = STATE.scDone.size;
+  return `
+  <div class="complete-screen">
+    <div class="big-check">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div style="font-size:22px;font-weight:500;margin-bottom:8px">Escenario completado</div>
+    <div style="font-size:14px;color:var(--color-text-secondary);margin-bottom:20px">
+      ${done} de 6 escenarios practicados
+    </div>
+    <div class="progress-bar" style="max-width:240px;margin:0 auto 20px"><div class="progress-fill" style="width:${Math.round(done/6*100)}%"></div></div>
+    ${done<6?`
+    <p style="font-size:14px;color:var(--color-text-secondary);margin-bottom:16px">
+      Cada escenario entrena el mismo protocolo en un contexto diferente. La repeticion en distintos tipos de situacion es lo que vuelve el L.A.R. automatico bajo presion real.
+    </p>
+    <div class="btn-row" style="justify-content:center">
+      <button onclick="goScenario()">Practicar otro escenario →</button>
+    </div>`:`
+    <div class="insight-box" style="max-width:420px;margin:0 auto 16px;text-align:left">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-success);margin-bottom:6px">Entrenamiento completado</div>
+      <p style="font-size:13px;color:var(--color-text-secondary);margin:0;line-height:1.6">
+        Practicaste el Protocolo L.A.R. en 6 situaciones criticas distintas. Eso es exactamente lo que transforma una herramienta cognitiva en una habilidad disponible bajo presion real.
+      </p>
+    </div>
+    <p style="font-size:14px;color:var(--color-text-secondary);font-style:italic;margin-bottom:16px">
+      "La presion no revela quien sos. Revela como diriges tu atencion."
+    </p>
+    <button class="primary" onclick="goPhase('intro')">Ver introduccion del protocolo</button>
+    `}
+  </div>`;
+}
+
+function goScenario(){
+  const next = SCENARIOS.find(s=>!STATE.scDone.has(s.id));
+  STATE.scenarioIdx = next ? next.id : 0;
+  STATE.phase='scenario';
+  render();
+}
+function selectSc(i){ STATE.scenarioIdx=i; STATE.phase='scenario'; render(); }
+function goPhase(p){ STATE.phase=p; render(); }
+
+function saveAndGo(k1,k2,phase){
+  save(k1, document.getElementById(k1).value);
+  save(k2, document.getElementById(k2).value);
+  STATE.phase=phase; render();
+}
+
+function saveLarAndGo(){
+  ['l-hechos','l-riesgo','l-estado','a-juicio','a-emocion','a-prioridad','r-ahora','r-despues','r-como']
+    .forEach(k=>{ const el=document.getElementById(k); if(el) save(k,el.value); });
+  STATE.phase='reflect'; render();
+}
+
+function completeScenario(){
+  ['ref1','ref2','ref3','ref4'].forEach(k=>{ const el=document.getElementById(k); if(el) save(k,el.value); });
+  STATE.scDone.add(STATE.scenarioIdx);
+  STATE.phase='complete'; render();
+}
+
+function bindEvents(){ }
+render();
+</script>
